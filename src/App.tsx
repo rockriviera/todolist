@@ -1,8 +1,8 @@
-import './App.css'
-
+import TaskPlanner from "./components/TaskPlanner.tsx";
 function App() {
   return (
     <>
+      <TaskPlanner></TaskPlanner>
     </>
   )
 }
