@@ -1,53 +1,92 @@
-import { Task } from "../interfaces/Task.ts";
+import Task from "../interfaces/Task.ts"; 
 import { useState } from "react";
-
 export default function TaskPlanner() {
-  const [taskFilter, setTaskFilter] = useState("");
+  const [taskFilterText, setTaskFilterText] = useState<string>("");
+  const [showCompletedTasks, setShowCompletedTasks] = useState<boolean>(false);
+
   const TASKS = [
-    { description: "Brush teeth" },
-    { description: "Polish mirror" },
-    { description: "Rescue Cat" },
-    { description: "Save the citizens of Metropolis" },
+    { description: "Brush teeth", finished: true },
+    { description: "Polish mirror", finished: false },
+    { description: "Rescue Cat", finished: true },
+    { description: "Save the citizens of Metropolis", finished: true },
   ];
   return (
     <>
-      <SearchBar searchQuery={taskFilter} onSearchQueryChange={setTaskFilter} />
-      <TaskList tasks={TASKS} taskFilter={taskFilter} />
+      <SearchBar
+        searchQuery={taskFilterText}
+        onSearchQueryChange={setTaskFilterText}
+        showCompletedTasks={showCompletedTasks}
+        onShowCompletedTasksChange={setShowCompletedTasks}
+      />
+      <TaskList
+        tasks={TASKS}
+        taskFilterText={taskFilterText}
+        showCompletedTasks={showCompletedTasks}
+      />
     </>
   );
 }
 function SearchBar({
   searchQuery,
   onSearchQueryChange,
+  showCompletedTasks,
+  onShowCompletedTasksChange,
 }: {
   searchQuery: string;
   onSearchQueryChange: React.Dispatch<React.SetStateAction<string>>;
+  showCompletedTasks: boolean;
+  onShowCompletedTasksChange: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
-    <input
-      type="text"
-      value={searchQuery}
-      placeholder="Search..."
-      onChange={(e) => {
-        onSearchQueryChange(e.target.value);
-      }}
-    />
+    <form>
+      <input
+        type="text"
+        value={searchQuery}
+        placeholder="Search..."
+        onChange={(e) => {
+          onSearchQueryChange(e.target.value);
+        }}
+      />
+      <label>
+        <input
+          type="checkbox"
+          checked={showCompletedTasks}
+          onChange={(e) => {
+            onShowCompletedTasksChange(e.target.checked);
+          }}
+        />
+        Show completed tasks
+      </label>
+    </form>
   );
 }
 function TaskList({
   tasks,
-  taskFilter,
+  taskFilterText,
+  showCompletedTasks,
 }: {
   tasks: Task[];
-  taskFilter: string;
+  taskFilterText: string;
+  showCompletedTasks:boolean;
 }) {
-  const filteredTasks = tasks.filter(
-    (task) => task.description.indexOf(taskFilter) !== -1
-  );
-  const filteredTaskList = filteredTasks.map((task) => (
+  const filteredTasks:Task[]=[];
+  tasks.forEach((task:Task) => {
+    if(task.description.indexOf(taskFilterText)===-1){
+      return;
+    }
+    if (!showCompletedTasks && !task.finished) {
+      return;
+    }
+    filteredTasks.push(
+    task
+    );
+
+  });
+
+  const TaskRows = filteredTasks.map((task) => (
     <TaskRow task={task} key={task.description} />
   ));
-  return <ul>{filteredTaskList}</ul>;
+  return <ul>{TaskRows}</ul>;
 }
 function TaskRow({ task }: { task: Task }) {
   return <li>{task.description}</li>;
